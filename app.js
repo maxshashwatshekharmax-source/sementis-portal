@@ -89,6 +89,18 @@ function initApp() {
 function bindEvents() {
     document.getElementById("login-form").addEventListener("submit", handleLogin);
 
+    // Toggle Evaluator Demo Mode Controls
+    document.getElementById("btn-toggle-demo").addEventListener("click", () => {
+        document.body.classList.toggle("show-demo-controls");
+        const btn = document.getElementById("btn-toggle-demo");
+        if (document.body.classList.contains("show-demo-controls")) {
+            btn.innerHTML = `<i data-lucide="settings"></i> Hide Evaluator Demo Mode`;
+        } else {
+            btn.innerHTML = `<i data-lucide="settings"></i> Show Evaluator Demo Mode`;
+        }
+        lucide.createIcons();
+    });
+
     // Toggle to Sign Up form
     document.getElementById("link-show-signup").addEventListener("click", (e) => {
         e.preventDefault();

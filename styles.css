@@ -1519,4 +1519,42 @@ a:hover {
     .search-box {
         max-width: 100%;
     }
+    
+    /* Touch target optimizations for mobile */
+    .btn {
+        padding: 0.8rem 1.4rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        min-height: 48px; /* High-tactility touch target */
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    .stats-card {
+        padding: 1rem !important;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        gap: 0.5rem !important;
+    }
+    .stats-card .card-icon {
+        width: 36px;
+        height: 36px;
+    }
+    .stats-card .card-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+    .stats-card .card-value {
+        font-size: 1.25rem;
+    }
 }
+
+/* Hide evaluator features unless body has show-demo-controls */
+body:not(.show-demo-controls) .simulation-hub,
+body:not(.show-demo-controls) #demo-login-panel {
+    display: none !important;
+}
+
