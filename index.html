@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sementis - Seed Production Management Portal</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main Shell -->
+    <div id="app-shell" class="hidden">
+        
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="sidebar-toggle" class="icon-btn" aria-label="Toggle Sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="logo">
+                    <span class="logo-icon">🌱</span>
+                    <span class="logo-text">SEMENTIS</span>
+                </div>
+            </div>
+
+            <!-- Simulation Hub & Role Quick-Switcher (Evaluator friendly) -->
+            <div class="simulation-hub">
+                <span class="hub-label"><i data-lucide="cpu"></i> Simulation Mode:</span>
+                <select id="role-switcher" class="select-field switcher-dropdown" aria-label="Quick Switch Role">
+                    <option value="admin">Admin (Amit Sharma)</option>
+                    <option value="manager">Production Manager (Dr. Kapoor)</option>
+                    <option value="officer">Field Officer (Rajesh Kumar)</option>
+                    <option value="farmer">Farmer/Grower (Ram Singh)</option>
+                    <option value="lab">Lab Quality Officer (Dr. Verma)</option>
+                    <option value="warehouse">Warehouse Staff (Vikram Singh)</option>
+                </select>
+            </div>
+
+            <div class="header-right">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+                    <i data-lucide="moon" class="theme-icon-dark"></i>
+                    <i data-lucide="sun" class="theme-icon-light hidden"></i>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div class="notifications-menu-container">
+                    <button id="notification-bell" class="icon-btn relative" title="Notifications" aria-label="View Notifications">
+                        <i data-lucide="bell"></i>
+                        <span id="notification-badge" class="badge danger hidden">0</span>
+                    </button>
+                    <div id="notifications-dropdown" class="dropdown-panel hidden">
+                        <div class="dropdown-header">
+                            <h3>Notifications</h3>
+                            <button id="mark-all-read-btn" class="text-btn">Mark all read</button>
+                        </div>
+                        <div id="notifications-list" class="dropdown-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile Summary -->
+                <div class="user-profile-badge">
+                    <div class="avatar" id="header-avatar">AS</div>
+                    <div class="profile-info">
+                        <span class="user-name" id="header-user-name">Amit Sharma</span>
+                        <span class="user-role" id="header-user-role">Administrator</span>
+                    </div>
+                    <button id="logout-btn" class="icon-btn danger-hover" title="Log Out" aria-label="Log Out">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <div class="app-layout">
+            <aside class="app-sidebar" id="app-sidebar">
+                <nav class="sidebar-nav">
+                    <ul id="sidebar-menu">
+                        <!-- Populated dynamically based on user role -->
+                    </ul>
+                </nav>
+                <div class="sidebar-footer">
+                    <span class="version-label">Sementis MVP v1.0.0</span>
+                </div>
+            </aside>
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+            <!-- Main Content Container -->
+            <main class="app-content" id="app-content">
+                
+                <!-- VIEW: Dashboard -->
+                <section id="view-dashboard" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Dashboard</h1>
+                            <p class="text-secondary">Seed Production Operations Overview</p>
+                        </div>
+                        <div class="view-actions">
+                            <span class="badge success" id="current-season-badge">Active Season: Rabi 2025-26</span>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards Grid -->
+                    <div class="stats-grid">
+                        <div class="stats-card">
+                            <div class="card-icon info-bg"><i data-lucide="users"></i></div>
+                            <div class="card-data">
+                                <span class="card-label">Registered Growers</span>
+                                <span class="card-value" id="stat-farmers">12</span>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="card-icon success-bg"><i data-lucide="map-pin"></i></div>
+                            <div class="card-data">
+                                <span class="card-label">Total Crop Area (Acres)</span>
+                                <span class="card-value" id="stat-area">565</span>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="card-icon warning-bg"><i data-lucide="clipboard-list"></i></div>
+                            <div class="card-data">
+                                <span class="card-label">Pending Inspections</span>
+                                <span class="card-value" id="stat-inspections">3</span>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="card-icon primary-bg"><i data-lucide="package"></i></div>
+                            <div class="card-data">
+                                <span class="card-label">Active Seed Lots</span>
+                                <span class="card-value" id="stat-lots">3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Acreage Target vs. Registered Area</h3>
+                            <div class="chart-container">
+                                <canvas id="chart-area-target"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Lot Quality Control Certification</h3>
+                            <div class="chart-container flex-center">
+                                <canvas id="chart-quality-ratio"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action items & Recent Activities -->
+                    <div class="dashboard-details">
+                        <div class="details-card flex-2">
+                            <div class="card-header-btn">
+                                <h3>Critical Monitoring Queue</h3>
+                                <button class="btn btn-secondary btn-sm" id="btn-quick-inspect">Verify Fields</button>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field ID</th>
+                                            <th>Farmer</th>
+                                            <th>Crop & Variety</th>
+                                            <th>Area (Ac)</th>
+                                            <th>Sowing Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-critical-table">
+                                        <!-- Dynamic entries -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="details-card flex-1">
+                            <h3>Alerts Feed</h3>
+                            <ul class="activities-list" id="dashboard-alerts-list">
+                                <!-- Dynamic entries -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: User Management (Admin Only) -->
+                <section id="view-users" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>User Directory</h1>
+                            <p class="text-secondary">Manage access levels, details, and roles</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-add-user">
+                            <i data-lucide="plus-circle"></i> Add User
+                        </button>
+                    </div>
+
+                    <div class="table-actions">
+                        <div class="search-box">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="user-search" class="input-field" placeholder="Search by name, role, phone...">
+                        </div>
+                        <div class="filter-box">
+                            <select id="user-role-filter" class="select-field">
+                                <option value="all">All Roles</option>
+                                <option value="admin">Administrator</option>
+                                <option value="manager">Production Manager</option>
+                                <option value="officer">Field Officer</option>
+                                <option value="farmer">Farmer/Grower</option>
+                                <option value="lab">Lab Quality Officer</option>
+                                <option value="warehouse">Warehouse Staff</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-container card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Username</th>
+                                    <th>Contact Details</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- Dynamic entries -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VIEW: Crop & Season Planning -->
+                <section id="view-plans" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Crop & Season Production Plans</h1>
+                            <p class="text-secondary">Define target yields and seed multiplication quotas</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-add-plan">
+                            <i data-lucide="plus-circle"></i> Create Production Plan
+                        </button>
+                    </div>
+
+                    <div class="table-actions">
+                        <div class="filter-box">
+                            <select id="plan-season-filter" class="select-field">
+                                <option value="all">All Seasons</option>
+                                <option value="S-102">Rabi 2025-26 (Active)</option>
+                                <option value="S-101">Kharif 2025 (Completed)</option>
+                                <option value="S-103">Kharif 2026 (Planning)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="plans-grid" id="plans-grid-body">
+                        <!-- Dynamic cards -->
+                    </div>
+                </section>
+
+                <!-- VIEW: Field Registrations -->
+                <section id="view-fields" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Cultivation Fields</h1>
+                            <p class="text-secondary">Field registration coordinates, seed sources, and statuses</p>
+                        </div>
+                    </div>
+
+                    <div class="table-actions">
+                        <div class="search-box">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="field-search" class="input-field" placeholder="Search by Field ID or Grower Name...">
+                        </div>
+                        <div class="filter-box">
+                            <select id="field-status-filter" class="select-field">
+                                <option value="all">All Statuses</option>
+                                <option value="Sown">Sown (Needs Inspection)</option>
+                                <option value="Inspected">Inspected (Approved)</option>
+                                <option value="Harvested">Harvested (Processed)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-container card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Field ID</th>
+                                    <th>Grower Name</th>
+                                    <th>Crop & Variety</th>
+                                    <th>Area (Acres)</th>
+                                    <th>Sowing Date</th>
+                                    <th>GPS Location</th>
+                                    <th>Seed Source</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fields-table-body">
+                                <!-- Dynamic entries -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VIEW: Field Inspection (Field Officer View) -->
+                <section id="view-inspections" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Field Monitoring & Inspections</h1>
+                            <p class="text-secondary">Log field visits, crop health details, and upload reports</p>
+                        </div>
+                    </div>
+
+                    <div class="inspection-layout">
+                        <!-- Left: Inspection Queue -->
+                        <div class="inspection-queue card">
+                            <h3>Inspection Backlog</h3>
+                            <div class="queue-list" id="inspections-queue-list">
+                                <!-- Dynamic entries -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Inspection History -->
+                        <div class="inspection-history card">
+                            <h3>Completed Inspections Feed</h3>
+                            <div class="history-list" id="inspections-history-list">
+                                <!-- Dynamic entries -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: Lab Testing & Certification (Quality Officer) -->
+                <section id="view-lab" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Quality Testing Lab</h1>
+                            <p class="text-secondary">Determine germination rates, purity indexes, and moisture certification</p>
+                        </div>
+                    </div>
+
+                    <div class="lab-layout">
+                        <div class="lab-queue card">
+                            <h3>Pending Lot Tests</h3>
+                            <div class="queue-list" id="lab-queue-list">
+                                <!-- Dynamic entries -->
+                            </div>
+                        </div>
+
+                        <div class="lab-results card">
+                            <h3>Certified Analysis Archive</h3>
+                            <div class="history-list" id="lab-certificates-list">
+                                <!-- Dynamic certificates -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: Inventory Management (Warehouse Staff) -->
+                <section id="view-inventory" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Seed Stock & Warehousing</h1>
+                            <p class="text-secondary">Track processed packages, lot batches, and print labels</p>
+                        </div>
+                        <button class="btn btn-secondary" id="btn-simulate-dispatch">
+                            <i data-lucide="truck"></i> Record Seed Dispatch
+                        </button>
+                    </div>
+
+                    <div class="table-actions">
+                        <div class="search-box">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="inventory-search" class="input-field" placeholder="Search by Lot ID or Batch...">
+                        </div>
+                    </div>
+
+                    <div class="table-container card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Stock ID</th>
+                                    <th>Lot ID</th>
+                                    <th>Crop & Variety</th>
+                                    <th>Batch Number</th>
+                                    <th>Available Stock (kg)</th>
+                                    <th>Packet Sizes</th>
+                                    <th>Location</th>
+                                    <th>Expiry Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body">
+                                <!-- Dynamic entries -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VIEW: Reports & Analytics -->
+                <section id="view-reports" class="content-view hidden">
+                    <div class="view-header">
+                        <div>
+                            <h1>Reports & Exports</h1>
+                            <p class="text-secondary">Generate Excel/PDF-compatible summaries of the seed cycle</p>
+                        </div>
+                    </div>
+
+                    <div class="reports-control card">
+                        <div class="reports-form-grid">
+                            <div class="form-group">
+                                <label for="report-type">Report Category</label>
+                                <select id="report-type" class="select-field">
+                                    <option value="grower">Grower Yield & Payout Report</option>
+                                    <option value="crop">Crop Variety Success Rate Report</option>
+                                    <option value="inspection">Field Inspection Log Summary</option>
+                                    <option value="stock">Warehouse Stock Expiry Ledger</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="report-season">Season</label>
+                                <select id="report-season" class="select-field">
+                                    <option value="all">All Seasons</option>
+                                    <option value="S-102">Rabi 2025-26</option>
+                                    <option value="S-101">Kharif 2025</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-end">
+                                <button class="btn btn-primary w-full" id="btn-generate-report">
+                                    <i data-lucide="trending-up"></i> Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-result card hidden" id="reports-result-container">
+                        <div class="reports-result-header">
+                            <h3 id="report-results-title">Grower Performance Summary</h3>
+                            <div class="btn-group">
+                                <button class="btn btn-secondary btn-sm" id="btn-report-excel">
+                                    <i data-lucide="file-text"></i> Export Excel
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="btn-report-pdf">
+                                    <i data-lucide="printer"></i> Export PDF
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="report-results-table">
+                                <!-- Dynamic Header and Body -->
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: Farmer Mobile Portal (Specialized Mobile View) -->
+                <section id="view-farmer-portal" class="content-view hidden">
+                    <!-- Top section with Local Language and Switcher -->
+                    <div class="farmer-header">
+                        <div class="farmer-welcome">
+                            <span class="farmer-lbl-welcome">Namaste,</span>
+                            <h1 id="farmer-display-name">Ram Singh</h1>
+                        </div>
+                        <div class="farmer-controls">
+                            <button id="btn-lang-toggle" class="btn btn-secondary btn-sm">
+                                <i data-lucide="languages"></i> <span id="lbl-lang-btn">हिन्दी (Hindi)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Farmer Balance Card -->
+                    <div class="farmer-balance-card">
+                        <div class="balance-meta">
+                            <span class="farmer-lbl-earnings">Total Accrued Earnings</span>
+                            <span class="balance-val" id="farmer-balance">₹45,000</span>
+                        </div>
+                        <div class="bank-meta">
+                            <i data-lucide="building"></i>
+                            <span id="farmer-bank">SBIN0001234 - 10098765432</span>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="farmer-actions-row">
+                        <button class="btn btn-primary" id="btn-farmer-register-field">
+                            <i data-lucide="plus-circle"></i> <span class="farmer-lbl-register-btn">Register New Crop Field</span>
+                        </button>
+                    </div>
+
+                    <!-- Crops Progress Timeline Cards -->
+                    <div class="farmer-section-title">
+                        <h3 class="farmer-lbl-active-crops">Your Cultivated Fields</h3>
+                    </div>
+                    <div class="farmer-crops-list" id="farmer-fields-container">
+                        <!-- Dynamic fields and timelines -->
+                    </div>
+
+                    <!-- Planting Sowing Guide -->
+                    <div class="farmer-section-title">
+                        <h3 class="farmer-lbl-sowing-guide">Seed Cultivation Guidelines</h3>
+                    </div>
+                    <div class="guide-card card">
+                        <div class="guide-header">
+                            <div class="guide-icon"><i data-lucide="book-open"></i></div>
+                            <div>
+                                <h4 class="farmer-lbl-guide-title">Standard Seed Sowing Isolation Checklist</h4>
+                                <p class="farmer-lbl-guide-desc">Critical instructions to maintain genetic purity and pass inspection.</p>
+                            </div>
+                        </div>
+                        <ul class="guide-checklist">
+                            <li>
+                                <i data-lucide="check-circle" class="text-success"></i>
+                                <span class="farmer-lbl-guide-p1">Maintain a minimum isolation distance of 3 meters from other wheat varieties to prevent pollen cross-contamination.</span>
+                            </li>
+                            <li>
+                                <i data-lucide="check-circle" class="text-success"></i>
+                                <span class="farmer-lbl-guide-p2">Use only approved Foundation/Breeder source seed tag tags provided at registration. Save physical tags.</span>
+                            </li>
+                            <li>
+                                <i data-lucide="check-circle" class="text-success"></i>
+                                <span class="farmer-lbl-guide-p3">Ensure mechanical rogueing: uproot and remove off-type plants and visual weeds before the flowering stage.</span>
+                            </li>
+                            <li>
+                                <i data-lucide="check-circle" class="text-success"></i>
+                                <span class="farmer-lbl-guide-p4">Keep soil moisture adequate but avoid waterlogging during germination and flowering stages.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- VIEW: Global Login Panel -->
+    <div id="view-login" class="login-overlay">
+        <div class="login-container">
+            <div class="login-brand">
+                <span class="brand-emoji">🌱</span>
+                <h2>Sementis</h2>
+                <p>Seed Production Management Portal</p>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="username" class="input-field" placeholder="Enter username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="password" class="input-field" placeholder="Enter password" required autocomplete="current-password">
+                    </div>
+                </div>
+                <div id="login-error" class="error-banner hidden">
+                    <i data-lucide="alert-circle"></i> Invalid credentials. Please try again.
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Sign In</button>
+                <p class="auth-toggle-text text-center mt-4 text-secondary" style="font-size: 0.85rem;">Don't have an account? <a href="#" id="link-show-signup">Sign Up</a></p>
+            </form>
+
+            <!-- Sign Up Form (hidden by default) -->
+            <form id="signup-form" class="signup-form hidden">
+                <div class="form-group">
+                    <label for="reg-name">Full Name</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="info"></i>
+                        <input type="text" id="reg-name" class="input-field" placeholder="Enter full name" required>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <div class="input-with-icon">
+                            <i data-lucide="user"></i>
+                            <input type="text" id="reg-username" class="input-field" placeholder="Choose username" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-role">Role</label>
+                        <select id="reg-role" class="select-field" style="padding-top: 0.5rem; padding-bottom: 0.5rem;" required>
+                            <option value="farmer">Farmer/Grower</option>
+                            <option value="officer">Field Officer</option>
+                            <option value="lab">Lab Quality Officer</option>
+                            <option value="warehouse">Warehouse Staff</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="reg-phone">Phone Number</label>
+                        <input type="text" id="reg-phone" class="input-field" placeholder="+91 XXXXX XXXXX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" class="input-field" placeholder="email@address.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <div class="input-with-icon">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="reg-password" class="input-field" placeholder="Create password" required>
+                    </div>
+                </div>
+
+                <!-- Farmer Specific Registration Fields -->
+                <div id="signup-farmer-fields">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="reg-location">Village / Location</label>
+                            <input type="text" id="reg-location" class="input-field" placeholder="Village, District" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-area">Land Size (Acres)</label>
+                            <input type="number" id="reg-area" class="input-field" min="1" step="0.5" placeholder="Size in acres" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-bank">Bank Details (IFSC & Account)</label>
+                        <input type="text" id="reg-bank" class="input-field" placeholder="IFSC Code - Account Number" required>
+                    </div>
+                </div>
+
+                <div id="signup-error" class="error-banner hidden">
+                    <i data-lucide="alert-circle"></i> Username already taken. Please choose another.
+                </div>
+                <div id="signup-success" class="error-banner hidden" style="background-color: var(--primary-light); color: var(--success-color); border-color: var(--primary-color);">
+                    <i data-lucide="check-circle" class="text-success"></i> Registration successful! Logging you in...
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full">Register Account</button>
+                <p class="auth-toggle-text text-center mt-4 text-secondary" style="font-size: 0.85rem;">Already have an account? <a href="#" id="link-show-signin">Sign In</a></p>
+            </form>
+
+            <div class="demo-login-panel" id="demo-login-panel">
+                <h4>Evaluation Quick Login</h4>
+                <div class="demo-btn-grid">
+                    <button class="btn btn-secondary btn-sm demo-login-btn" data-user="admin">Admin</button>
+                    <button class="btn btn-secondary btn-sm demo-login-btn" data-user="manager">Manager</button>
+                    <button class="btn btn-secondary btn-sm demo-login-btn" data-user="officer1">Officer</button>
+                    <button class="btn btn-secondary btn-sm demo-login-btn" data-user="farmer1">Farmer</button>
+                    <button class="btn btn-secondary btn-sm demo-login-btn" data-user="lab">Lab Officer</button>
+                    <button class="btn btn-secondary btn-sm demo-login-btn" data-user="warehouse">Warehouse</button>
+                </div>
+                <span class="demo-hint">Demo Password is: <b>123</b></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL MODALS CONTAINER -->
+    <div id="modal-container" class="modal-backdrop hidden">
+        
+        <!-- MODAL: Add User -->
+        <div id="modal-add-user" class="modal-content hidden">
+            <div class="modal-header">
+                <h2>Add New System User</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-user">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="new-user-name">Full Name</label>
+                        <input type="text" id="new-user-name" class="input-field" required>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="new-user-username">Username</label>
+                            <input type="text" id="new-user-username" class="input-field" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-role">System Role</label>
+                            <select id="new-user-role" class="select-field" required>
+                                <option value="admin">Administrator</option>
+                                <option value="manager">Production Manager</option>
+                                <option value="officer">Field Officer</option>
+                                <option value="farmer">Farmer/Grower</option>
+                                <option value="lab">Lab Quality Officer</option>
+                                <option value="warehouse">Warehouse Staff</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="new-user-phone">Phone Number</label>
+                            <input type="text" id="new-user-phone" class="input-field" placeholder="+91 XXXXX XXXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-email">Email Address</label>
+                            <input type="email" id="new-user-email" class="input-field" required>
+                        </div>
+                    </div>
+                    <!-- Farmer specific fields -->
+                    <div id="farmer-only-fields" class="hidden">
+                        <hr class="modal-divider">
+                        <h3>Farmer Land Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-user-location">Village / Location</label>
+                                <input type="text" id="new-user-location" class="input-field" placeholder="Karnal, Haryana">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-user-area">Land Size (Acres)</label>
+                                <input type="number" id="new-user-area" class="input-field" min="1" step="0.5">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-user-bank">Bank Details (IFSC & Account)</label>
+                            <input type="text" id="new-user-bank" class="input-field" placeholder="SBIN0001234 - 10098765432">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MODAL: Create Plan -->
+        <div id="modal-add-plan" class="modal-content hidden">
+            <div class="modal-header">
+                <h2>Create Seed Production Plan</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-plan">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="plan-crop-select">Select Crop Strain</label>
+                        <select id="plan-crop-select" class="select-field" required>
+                            <!-- Dynamically populated options -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="plan-season-select">Target Season</label>
+                        <select id="plan-season-select" class="select-field" required>
+                            <option value="S-102">Rabi 2025-26</option>
+                            <option value="S-103">Kharif 2026</option>
+                        </select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="plan-target-area">Target Area (Acres)</label>
+                            <input type="number" id="plan-target-area" class="input-field" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plan-expected-qty">Expected Production (Metric Tons)</label>
+                            <input type="number" id="plan-expected-qty" class="input-field" min="1" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Plan</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MODAL: Farmer Field Registration -->
+        <div id="modal-farmer-field" class="modal-content hidden">
+            <div class="modal-header">
+                <h2 id="farmer-lbl-modal-title">Register New Seed Field</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-farmer-field">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="ff-crop-select" id="farmer-lbl-select-crop">Select Allocated Crop & Variety</label>
+                        <select id="ff-crop-select" class="select-field" required>
+                            <!-- Dynamic crop selections -->
+                        </select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ff-area" id="farmer-lbl-field-size">Field Size (Acres)</label>
+                            <input type="number" id="ff-area" class="input-field" min="0.5" step="0.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ff-sowing-date" id="farmer-lbl-sowing-date">Sowing Date</label>
+                            <input type="date" id="ff-sowing-date" class="input-field" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ff-soil-type" id="farmer-lbl-soil">Soil Texture Type</label>
+                            <select id="ff-soil-type" class="select-field" required>
+                                <option value="Loam">Loam</option>
+                                <option value="Sandy Loam">Sandy Loam</option>
+                                <option value="Clay Loam">Clay Loam</option>
+                                <option value="Alluvial">Alluvial</option>
+                                <option value="Sandy">Sandy</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ff-prev-crop" id="farmer-lbl-prev-crop">Previous Season Crop</label>
+                            <input type="text" id="ff-prev-crop" class="input-field" placeholder="Rice or Fallow" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ff-gps" id="farmer-lbl-gps-label">GPS Coordinate Reading</label>
+                        <div class="input-action-group">
+                            <input type="text" id="ff-gps" class="input-field" placeholder="Fetch coordinates from phone GPS..." required readonly>
+                            <button type="button" class="btn btn-secondary" id="btn-gps-trigger">
+                                <i data-lucide="map-pin"></i> <span id="farmer-lbl-gps-btn">Capture</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ff-seed-source" id="farmer-lbl-seed-src">Seed Tag/Certificate Source Number</label>
+                        <input type="text" id="ff-seed-source" class="input-field" placeholder="e.g. Tag No. FND-9087-B" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger" id="farmer-lbl-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="farmer-lbl-submit">Submit Registration</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MODAL: Add Field Inspection (Officer) -->
+        <div id="modal-add-inspection" class="modal-content hidden">
+            <div class="modal-header">
+                <h2>Record Field Monitoring Inspection</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-inspection">
+                <input type="hidden" id="ins-field-id">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Field Details</label>
+                            <div class="display-text-box" id="ins-field-text">Field ID: F-03 (Ram Singh, Wheat)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ins-growth-stage">Crop Growth Stage</label>
+                            <select id="ins-growth-stage" class="select-field" required>
+                                <option value="Vegetative">Vegetative Growth</option>
+                                <option value="Flowering">Flowering / Heading</option>
+                                <option value="Maturity">Maturity / Pre-harvest</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ins-moisture">Crop/Soil Moisture (%)</label>
+                            <input type="number" id="ins-moisture" class="input-field" min="1" max="40" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ins-status">Inspection Verification Status</label>
+                            <select id="ins-status" class="select-field" required>
+                                <option value="Approved">Passed (Approve Crop)</option>
+                                <option value="Rejected">Failed (Reject Lot)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ins-pest">Pest or Disease Observations</label>
+                        <input type="text" id="ins-pest" class="input-field" placeholder="None detected, or describe infection..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ins-notes">General Notes / Isolation Details</label>
+                        <textarea id="ins-notes" class="textarea-field" placeholder="Isolation distance, weeding notes, etc." required></textarea>
+                    </div>
+                    <!-- Photo selection / simulation -->
+                    <div class="form-group">
+                        <label>Inspection Photo Attachment</label>
+                        <div class="photo-uploader-box">
+                            <input type="file" id="ins-photo-file" class="hidden" accept="image/*">
+                            <div class="upload-trigger" id="photo-upload-trigger">
+                                <i data-lucide="camera" class="upload-icon"></i>
+                                <span class="upload-text">Click to snap photo or select file</span>
+                            </div>
+                            <div id="photo-preview-container" class="hidden">
+                                <img id="photo-preview-img" src="" alt="Inspection Field Snapshot">
+                                <button type="button" class="btn btn-secondary btn-sm" id="btn-retake-photo">Remove Photo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Inspection Report</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MODAL: Harvest / Process Registration (Officer / Staff) -->
+        <div id="modal-record-harvest" class="modal-content hidden">
+            <div class="modal-header">
+                <h2>Record Crop Harvest & Processing Lot</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-record-harvest">
+                <input type="hidden" id="harv-field-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Cultivation Origin</label>
+                        <div class="display-text-box" id="harv-field-text">F-01 (Wheat)</div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="harv-raw-qty">Raw Harvested Quantity (Quintals)</label>
+                            <input type="number" id="harv-raw-qty" class="input-field" min="1" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="harv-proc-qty">Processed Quantity (Quintals)</label>
+                            <input type="number" id="harv-proc-qty" class="input-field" min="1" step="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="harv-loss">Cleaning/Grading Shrinkage (Quintals)</label>
+                            <input type="number" id="harv-loss" class="input-field" min="0" step="0.1" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="harv-grade">Grading Result</label>
+                            <select id="harv-grade" class="select-field" required>
+                                <option value="Grade A">Grade A (Premium Seed)</option>
+                                <option value="Grade B">Grade B (Standard Seed)</option>
+                                <option value="Grade C">Grade C (Substandard)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Process Seed Lot</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MODAL: Enter Lab Test Results (Lab Officer) -->
+        <div id="modal-lab-test" class="modal-content hidden">
+            <div class="modal-header">
+                <h2>Enter Laboratory Analysis Results</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-lab-test">
+                <input type="hidden" id="lab-lot-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Testing Target</label>
+                        <div class="display-text-box" id="lab-lot-text">Lot L-01 (Wheat)</div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="lab-germination">Germination Percentage (%)</label>
+                            <input type="number" id="lab-germination" class="input-field" min="10" max="100" required>
+                            <span class="field-hint" id="lab-germination-threshold">Standard threshold: Min 85%</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="lab-purity">Physical Purity Percentage (%)</label>
+                            <input type="number" id="lab-purity" class="input-field" min="80" max="100" step="0.1" required>
+                            <span class="field-hint" id="lab-purity-threshold">Standard threshold: Min 98%</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lab-moisture">Moisture Content (%)</label>
+                        <input type="number" id="lab-moisture" class="input-field" min="1" max="30" step="0.1" required>
+                        <span class="field-hint" id="lab-moisture-threshold">Standard threshold: Max 12%</span>
+                    </div>
+                    <div class="form-group hidden" id="fail-reason-container">
+                        <label for="lab-fail-reason">Rejection Cause Detail</label>
+                        <input type="text" id="lab-fail-reason" class="input-field" placeholder="Reason for failing certificate guidelines">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Certify Quality</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MODAL: Barcode/QR Label Preview (Warehouse Staff) -->
+        <div id="modal-qr-preview" class="modal-content modal-sm hidden">
+            <div class="modal-header">
+                <h2>Batch Seed Tag / QR Label</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body flex-center column text-center">
+                <div class="qr-tag-card" id="qr-tag-print-area">
+                    <div class="qr-tag-header">
+                        <h4>SEMENTIS SEED CERTIFICATION</h4>
+                        <span class="tag-badge-certified">CERTIFIED</span>
+                    </div>
+                    <div class="qr-tag-body">
+                        <div class="qr-code-placeholder" id="qr-code-graphic">
+                            <!-- Vector QR drawn here -->
+                        </div>
+                        <div class="qr-tag-details">
+                            <p><strong>Batch:</strong> <span id="qr-lbl-batch">BAT-W-HD-001</span></p>
+                            <p><strong>Crop/Variety:</strong> <span id="qr-lbl-crop">Wheat (HD-2967)</span></p>
+                            <p><strong>Lot ID:</strong> <span id="qr-lbl-lot">L-01</span></p>
+                            <p><strong>Expiry Date:</strong> <span id="qr-lbl-expiry">2027-04-20</span></p>
+                            <p><strong>Qty/Packet:</strong> <span id="qr-lbl-pkg">40kg</span></p>
+                        </div>
+                    </div>
+                    <div class="qr-tag-footer">
+                        <p>Scan to verify compliance with National Seed Standards</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-4" id="btn-print-qr">
+                    <i data-lucide="printer"></i> Print Certification Label
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL: Simulated Seed Dispatch Form (Warehouse Staff) -->
+        <div id="modal-dispatch" class="modal-content hidden">
+            <div class="modal-header">
+                <h2>Record Seed Dispatch / Delivery Order</h2>
+                <button class="modal-close-btn close-modal-trigger"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-dispatch">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="disp-inv-select">Select Stock Inventory Batch</label>
+                        <select id="disp-inv-select" class="select-field" required>
+                            <!-- Dynamic batch options -->
+                        </select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="disp-qty">Dispatch Quantity (kg)</label>
+                            <input type="number" id="disp-qty" class="input-field" min="1" required>
+                            <span class="field-hint" id="disp-max-qty">Available: 0kg</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="disp-buyer">Buyer / Dealer Name</label>
+                            <input type="text" id="disp-buyer" class="input-field" placeholder="AgriCorp Seeds Co." required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="disp-dest">Destination Address</label>
+                        <input type="text" id="disp-dest" class="input-field" placeholder="Central Depot, Rohtak, Haryana" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal-trigger">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Dispatch Stock</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Script Loads -->
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
