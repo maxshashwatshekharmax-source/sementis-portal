@@ -24,3 +24,106 @@ labels:
 reviewers:
 
 "project-maintainer"
+version: 2
+
+updates:
+
+# =====================================================
+
+# 🌐 Node.js / npm Dependencies
+
+# =====================================================
+
+* package-ecosystem: "npm"
+  directory: "/"
+
+  schedule:
+  interval: "daily"
+  time: "04:00"
+  timezone: "Asia/Kolkata"
+
+  open-pull-requests-limit: 10
+
+  labels:
+
+  * "dependencies"
+  * "npm"
+  * "security"
+
+  commit-message:
+  prefix: "npm"
+
+  versioning-strategy: increase
+
+  rebase-strategy: auto
+
+  allow:
+
+  * dependency-type: "direct"
+  * dependency-type: "indirect"
+
+  ignore:
+
+  * dependency-name: "react"
+    update-types:
+
+    * "version-update:semver-major"
+
+  * dependency-name: "react-dom"
+    update-types:
+
+    * "version-update:semver-major"
+
+  groups:
+  frontend:
+  patterns:
+  - "react*"
+  - "@types/*"
+  - "eslint*"
+  - "prettier*"
+
+  backend:
+  patterns:
+  - "express*"
+  - "mongoose*"
+  - "jsonwebtoken*"
+
+# =====================================================
+
+# ⚙️ GitHub Actions
+
+# =====================================================
+
+* package-ecosystem: "github-actions"
+  directory: "/"
+
+  schedule:
+  interval: "weekly"
+
+  labels:
+
+  * "github-actions"
+  * "automation"
+
+  commit-message:
+  prefix: "actions"
+
+# =====================================================
+
+# 🐳 Docker Dependencies
+
+# =====================================================
+
+* package-ecosystem: "docker"
+  directory: "/"
+
+  schedule:
+  interval: "weekly"
+
+  labels:
+
+  * "docker"
+  * "container"
+
+  commit-message:
+  prefix: "docker"
