@@ -9,3 +9,18 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+directory: "/"
+schedule:
+interval: "weekly"
+
+commit-message:
+prefix: "github-actions"
+
+labels:
+
+"github-actions"
+"automation"
+
+reviewers:
+
+"project-maintainer"
